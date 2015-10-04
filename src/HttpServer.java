@@ -1,21 +1,16 @@
-import Http.Header;
-import Http.ResponseBuilder;
+import http.header.DefaultHttpHeader;
 import utils.Configuration;
-import utils.Delimiters;
-import utils.HttpMethods;
-import utils.HttpStatusCode;
 
-import java.io.*;
-import java.net.HttpCookie;
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
-import java.util.Locale;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+
 
 /**
  * Created by daleappleby on 3/10/15.
@@ -83,10 +78,6 @@ public class HttpServer implements Runnable {
             return;
         }
 
-        final ResponseBuilder responseBuilder = new ResponseBuilder();
-        responseBuilder.setAllow(new HttpMethods[]{HttpMethods.GET,HttpMethods.POST})
-                        .setServer(Configuration.HTTP_SERVER_NAME);
-
         //Start accepting connections
         while(isRunning){
             try {
@@ -107,70 +98,8 @@ public class HttpServer implements Runnable {
                 //Create a string from the header
                 String header = new String(buffer,0,buffer.length, StandardCharsets.UTF_8);
 
-                //Create and parse the header via a header obj
-                Header headerObj = new Header(header);
+                DefaultHttpHeader defaultHttpHeader = new DefaultHttpHeader();
 
-                //Check to see if its a valid header
-                if(!headerObj.isValidHeader()){
-                    //Malformed header
-                    logger.log(Level.INFO,"Received malformed header: " + headerObj.getHeader());
-
-                    //Write bad request response - status code 400
-                    responseBuilder.setHttpVers(headerObj.getHeader("httpVers"))
-                            .setHttpResponseCode(HttpStatusCode.BAD_REQUEST)
-                            .setDate(Calendar.getInstance().getTime());
-                    System.out.println(responseBuilder.build());
-                    new BufferedOutputStream(socket.getOutputStream()).write(responseBuilder.build().getBytes());
-                    continue;
-                }
-
-                //Check the resource exists otherwise 404 not found
-                String resourcePath = headerObj.getHeader("resource");
-                File file = new File(HttpServer.class.getProtectionDomain().getCodeSource().getLocation().getPath() +
-                        Configuration.DEFAULT_WEB_FOLDER + (resourcePath.equals(Delimiters.SLASH)?Configuration.DEFAULT_WEB_FILE:resourcePath));
-                try {
-                    if(!file.exists()){
-                        logger.log(Level.INFO,"Could not retrieve requested resource " + file.getAbsolutePath());
-                    }
-                    FileInputStream fileInputStream = new FileInputStream(file);
-                }catch (FileNotFoundException ex){
-                    //Resource not found Handle this soon...
-                    responseBuilder.setHttpVers(headerObj.getHeader("httpVers"))
-                            .setHttpResponseCode(HttpStatusCode.NOT_FOUND)
-                            .setDate(Calendar.getInstance().getTime());
-                    System.out.println(responseBuilder.build());
-                    socket.close();
-                    continue;
-                }
-
-                //Everything has gone okay so far, reply with 202 Accepted to notify the response is being processed.
-                BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream());
-                responseBuilder.setHttpVers(headerObj.getHeader("httpVers"))
-                        .setHttpResponseCode(HttpStatusCode.ACCEPTED)
-                        .setDate(Calendar.getInstance().getTime());
-
-
-                //The request has been processed and everything had gone okay.. read in the resource and attach it to the request body
-                FileInputStream fileInputStream = new FileInputStream(file);
-                byte[] fileBuffer = new byte[(int)file.length()];
-                fileInputStream.read(fileBuffer,0,fileBuffer.length);
-                responseBuilder.setHttpVers(headerObj.getHeader("httpVers"))
-                               .setContentType("text/html")
-                               .setContentLength(fileBuffer.length)
-                               .setHttpResponseCode(HttpStatusCode.OK)
-                               .setDate(Calendar.getInstance().getTime()).
-                                setBody(new String(fileBuffer));
-
-                System.out.println(responseBuilder.build());
-
-                //Write out the response
-                DataOutputStream dataOutputStream = new DataOutputStream(bufferedOutputStream);
-                dataOutputStream.writeUTF(responseBuilder.build());
-                dataOutputStream.flush();
-
-                //Unused atm, test later
-                HttpCookie cookie = new HttpCookie(String.format(Locale.ENGLISH,"SessionCookie{0}",Configuration.HTTP_SERVER_NAME), UUID.randomUUID().toString());
-                cookie.setComment("");
             } catch (IOException e) {
                 e.printStackTrace();
             }
