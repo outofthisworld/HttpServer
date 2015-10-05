@@ -19,6 +19,7 @@ public class HttpHeaderDecoder {
     private final HttpHeader httpHeader = new HttpHeader();
     private CharBufReader bufRdr;
     private static final int PEEK_NEWLINE = 0;
+    private static final int PEEK_SEPERATOR = 3;
     private static final int PEEK_ERROR = 1;
     private int $state;
 
@@ -30,42 +31,57 @@ public class HttpHeaderDecoder {
         bufRdr.markPosition();
 
         for(int i = 0; i < 2;i++) {
+            int mark = bufRdr.getMarkPosition();
+            int idx =  bufRdr.peekSeperator(HttpConstants.SPACE_CHAR, true);
+            checkErrorState(idx);
+            switch(i) {
+                case 0: httpHeader.putHeader(
+                        HttpHeaderConstants.METHOD.name, bufRdr.extract(mark, idx).get()
+                );
+                    break;
+                case 1: httpHeader.putHeader(
+                        HttpHeaderConstants.RESOURCE.name, bufRdr.extract(mark, idx).get()
+                );
+                    break;
+            }
+            bufRdr.markPosition();
+        }
+
+        checkErrorState(bufRdr.peekSeperator(HttpConstants.NEWLINE_CHAR, false));
+
+        int idx = 0;
+        for(; bufRdr.hasNext();){
+            char c =  (char) bufRdr.readNext();
             try {
-                int mark = bufRdr.getMarkPosition();
+                System.out.println("Currently at: " +chrBuf.position());
+                String key = bufRdr.extract(idx = bufRdr.peekSeperator(HttpConstants.COLON_CHAR, false)).get();
+                System.out.println("Attempting to move to :" + idx);
+                System.out.println("Now at " + chrBuf.position());
 
-                String _headerConst = i == 0 ? HttpHeaderConstants.METHOD.name:HttpHeaderConstants.RESOURCE.name;
+                if(bufRdr.peekSeperator(HttpConstants.NEWLINE_CHAR,true) != -1){
 
-                int idx = bufRdr.peekSeperator(HttpConstants.SPACE_CHAR, true, false);
-
-                httpHeader.putHeader(_headerConst, bufRdr.extract(mark,idx).get());
-
-                bufRdr.markPosition();
-
-            }catch (NoSuchElementException e){
-                $state = PEEK_ERROR;
+                }
+                String value = bufRdr.extract(idx = bufRdr.peekSeperator(HttpConstants.NEWLINE_CHAR,false)).get();
+                System.out.println("Attempting to move to :" + idx);
+                System.out.println("Now at " + chrBuf.position());
+                System.out.println(key);
+                System.out.println(value);
+                System.out.println();
+            } catch (NoSuchElementException e) {
+                System.out.println("Error" + idx);
             }
         }
-
-        for(; bufRdr.hasNext();){
-            decodeChar(bufRdr.readNext());
-
-
-        }
-
-
-        httpHeader.forEachHeaderTag((k,v)-> System.out.println(v.getKey() + " " + v.getValue()));
         return httpHeader;
     }
 
 
-
-    private final void decodeChar(int character){
-        if(character == HttpConstants.NEWLINE_CHAR){
-            $state = PEEK_NEWLINE;
+    public void checkErrorState(int idx){
+        if(idx == -1){
+            $state = PEEK_ERROR;
         }
     }
 
-    private void readStream(final InputStream in,final CharBuffer chrBuf,Charset encoding) throws IOException {
+    private void readStream(final InputStream in,final CharBuffer chrBuf,final Charset encoding) throws IOException {
         new BufferedReader(new InputStreamReader(in, encoding)).read(chrBuf);
         chrBuf.flip();
     }

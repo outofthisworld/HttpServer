@@ -4,9 +4,6 @@ import http.constants.HttpStatusCode;
 import http.constants.HttpVersion;
 
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.function.BiConsumer;
 
 /**
  * Created by daleappleby on 3/10/15.
@@ -63,16 +60,8 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
     }
 
 
-    /**
-     * For each header tag.
-     *
-     * @param biConsumer the bi consumer
-     */
-    public void forEachHeaderTag(BiConsumer<Iterator<Map.Entry<String, String>>, Map.Entry<String, String>> biConsumer) {
-        for (Iterator<Map.Entry<String, String>> it = headerTags.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry headerTag = it.next();
-            biConsumer.accept(it, headerTag);
-        }
+    public HashMap<String, String> getHeaderTags() {
+        return headerTags;
     }
 
     /**

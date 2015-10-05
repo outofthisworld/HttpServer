@@ -1,7 +1,5 @@
 package http.header;
 
-import http.constants.HttpConstants;
-
 import java.nio.CharBuffer;
 import java.util.Optional;
 
@@ -64,14 +62,13 @@ final class CharBufReader {
      * @param c the c
      * @return the int
      */
-    public int peekSeperator(char c, boolean withinLine,boolean resetPosition){
-        int startPos = chrBuf.position();
+    public int peekSeperator(char c,boolean resetPosition){
+        int startPos = getPosition();
         while(hasNext()){
             char readChar = (char) readNext();
-            if(readChar == c)
-                return chrBuf.position();
-            if(c == HttpConstants.NEWLINE.charAt(0) && withinLine)
-                break;
+            if(readChar == c) {
+                return getPosition();
+            }
         }
         if(resetPosition)
             chrBuf.position(startPos);
@@ -79,6 +76,28 @@ final class CharBufReader {
         return -1;
     }
 
+    public int getPosition(){
+        return chrBuf.position();
+    }
+
+    /**
+     * Extract optional.
+     *
+     * @param high the high
+     * @return the optional
+     */
+    public Optional<String> extract(int high){
+        if(high > chrBuf.limit() || high < chrBuf.position()) {
+            System.out.println("High below chrbuf pos");
+            return Optional.empty();
+        }
+        System.out.println("moving forward " + (high-chrBuf.position()) + " spaces");
+        char[] buffer = new char[high-chrBuf.position()];
+        for(int i = 0; i < high-chrBuf.position();i++){
+            buffer[i] = (char)readNext();
+        }
+        return Optional.of(new String(buffer));
+    }
 
     /**
      * Extract optional.
@@ -88,14 +107,12 @@ final class CharBufReader {
      * @return the optional
      */
     public Optional<String> extract(int low,int high){
-        if(low < 0 || high > chrBuf.limit())
+        if(low < 0 || high > chrBuf.limit() || high < low)
             return Optional.empty();
 
-        System.out.println(high);
-        System.out.println(low);
         chrBuf.position(low);
-        char[] buffer = new char[50];
-        for(int i = 0; i < high;i++){
+        char[] buffer = new char[high-low];
+        for(int i = 0; i < high-low;i++){
             buffer[i] = (char)readNext();
         }
         return Optional.of(new String(buffer));

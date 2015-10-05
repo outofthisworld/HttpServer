@@ -1,3 +1,4 @@
+import http.header.HttpHeader;
 import http.header.HttpHeaderDecoder;
 import utils.Configuration;
 
@@ -5,6 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,7 +90,13 @@ public class HttpServer implements Runnable {
 
                 //We have received a connection... log it
                 logger.log(Level.INFO, "Received connection from " + socket.getInetAddress().getHostAddress());
-                httpHeaderDecoder.decode(socket.getInputStream(), StandardCharsets.UTF_8);
+                HttpHeader httpHeader = httpHeaderDecoder.decode(socket.getInputStream(), StandardCharsets.UTF_8);
+
+                for(Map.Entry<String,String> entry:httpHeader.getHeaderTags().entrySet()){
+                    System.out.println("key ==== " +entry.getKey() + " value === " + entry.getValue());
+                }
+                isRunning=false;
+
 
 
             } catch (IOException e) {
