@@ -1,99 +1,100 @@
 package http.header;
 
 import http.constants.HttpConstants;
-import utils.Configuration;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 
 /**
  * Created by daleappleby on 4/10/15.
+ * @param <T>    the type parameter
  */
-public final class HttpHeaderReader {
-
-    private static final byte PEEK_SPACE = 0;
-    private static final byte PEEK_NEWLINE = 1;
-    private static final byte PEEK_COLON = 2;
-    private static final byte PEEK_BODY = 3;
-    private static final byte PEEK_HEAD = 4;
-
-    private HttpHeader httpHeader = new HttpHeader();
-    private CharBuffer chrBuf;
-    private int STATE;
+final class HttpHeaderReader<T extends AbstractHeader> implements IHttpHeaderReader {
+    private final CharBuffer chrBuf;
+    private final AbstractHeader httpHeader;
+    private int state = -1;
+    private int idxCharPos = -1;
+    private int idxCharCount;
+    private int upperBound;
     private int line;
+    private int idxChar;
+    private boolean peekedSep = false;
 
-    public static HttpHeader parseHeader(CharBuffer chrBuf){
-        return new HttpHeaderReader(chrBuf).parseHeader();
+    public HttpHeaderReader(CharBuffer charBuffer,T httpHeader){
+        this.chrBuf = charBuffer;
+        this.httpHeader = httpHeader;
     }
 
-    public static HttpHeader par
-
-    private HttpHeaderReader(CharBuffer charBuffer){
+    private final void extractHead(){
 
     }
 
-    public HttpHeader parseHeader(InputStream in) throws IOException {
-        CharBuffer chrBuffer = chrBuf.allocate(Configuration.MAX_HEADER_SIZE);
-        new BufferedReader(new InputStreamReader(in)).read(chrBuffer);
-        return parseHeader(chrBuffer);
+    public void proceed(){
+        decodeChar(chrBuf.get());
     }
 
-    public HttpHeader parseHeader(String header){
-        return parseHeader(CharBuffer.wrap(header));
+    public boolean hasNext(){
+        return chrBuf.hasRemaining();
     }
 
-    public HttpHeader parseHeader(){
-        try {
-            if(in.read(chrBuf) != -1){
-                System.out.println("Not -1");
-            }
+    public int state(){
+      return state;
+    }
 
-            chrBuf.flip();
-            chrBuf.mark();
-            extractHead();
-
-           /* char idx;
-            decodeChar(idx = chrBuf.get());
-
-
-            while(chrBuf.position() < chrBuf.limit()-1){
-
-                if(STATE == PEEK_HEAD) {
-                    httpHeader.putHeader();
+    public void extract(){
+        char[] value = new char[upperBound- idxCharPos];
+        char[] key = new char[idxCharPos -chrBuf.position()];
+        for(int i = 0,j = 0;chrBuf.position()!=upperBound;i++){
+            if(chrBuf.position() < idxCharPos) {
+                if(chrBuf.position() == idxCharPos) {
+                    chrBuf.get();
+                    continue;
                 }
-
-            }*/
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return httpHeader;
-    }
-
-    private final void extractHead() {
-        int spc = 0;
-        for (char c = chrBuf.get(); STATE != PEEK_NEWLINE && chrBuf.hasRemaining(); c = chrBuf.get()){
-            decodeChar(c);
-            if(STATE == PEEK_HEAD) {
-                System.out.println(chrBuf.subSequence(chrBuf.ma, chrBuf.position()).array());
+                key[i] = chrBuf.get();
+            }else{
+                value[j++] = chrBuf.get();
             }
         }
+        httpHeader.putHeader(new String(key),new String(value));
     }
 
-    private final void decodeChar(char chr){
-        if(line == PEEK_SPACE && Character.isSpaceChar(chr)){
-            STATE = PEEK_HEAD;
-        }if(chr == HttpConstants.NEWLINE.charAt(0) && STATE ==  PEEK_NEWLINE){
-            STATE = PEEK_BODY;
-            line++;
-        } else if(chr == HttpConstants.NEWLINE.charAt(0)) {
-            STATE = PEEK_NEWLINE;
-            line++;
-        }else if(chr == ':') {
-            STATE = PEEK_COLON;
-        }
+    public void peekInterest(){
+        upperBound = chrBuf.position();
+        chrBuf.reset();
+    }
+
+
+    public void mark(){
+        chrBuf.mark();
+    }
+
+    public void setIndexChar(char charr){
+        this.idxChar = charr;
+    }
+
+    public void resetIndexCharCount(){
+        this.idxCharCount = 0;
+    }
+
+    public void decodeChar(char chr){
+       if(chr == HttpConstants.NEWLINE.charAt(0) && line == PEEK_SPACE) {
+           state = PEEK_HEAD;
+           line++;
+       }else if(chr == idxChar && !peekedSep) {
+           peekedSep = true;
+           idxCharCount++;
+           idxCharPos = chrBuf.position();
+           state = PEEK_SEPERATOR;
+       }else if(chr == HttpConstants.NEWLINE.charAt(0)) {
+            peekedSep = false;
+            state = PEEK_NEWLINE;
+           line++;
+       }else {
+           state =PEEK_NONE;
+       }
+    }
+
+    public void reset(){
+        state = -1;
+        chrBuf.clear();
     }
 }

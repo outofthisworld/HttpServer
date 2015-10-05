@@ -128,6 +128,17 @@ public class OutgoingHttpHeader extends HttpHeader {
 
     public class DefaultHttpResponseBuilder extends HttpHeaderBuilder {
 
+        /**
+         * Instantiates a new Http header builder.
+         * Note: this class takes in an instance of the outer class in so that it can be initiated
+         * from outside this class.
+         *
+         * @param header the header
+         */
+        public DefaultHttpResponseBuilder(AbstractHeader header) {
+            super(header);
+        }
+
         public DefaultHttpResponseBuilder setDate(Date date) {
             OutgoingHttpHeader.this.setDate(date);
             return this;

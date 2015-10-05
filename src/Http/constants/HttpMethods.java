@@ -8,14 +8,17 @@ public enum HttpMethods {
      * The GET.
      */
     GET,
+
     /**
      * The POST.
      */
     POST,
+
     /**
      * The PUT.
      */
     PUT,
+
     /**
      * The DELETE.
      */

@@ -9,10 +9,37 @@ import http.constants.HttpVersion;
  */
 public class HttpHeader extends AbstractHeader  {
 
+    /**
+     * Instantiates a new Http header.
+     */
     public HttpHeader() {
         super();
     }
 
+    /**
+     * Instantiates a new Http header.
+     *
+     * @param vers the vers
+     */
+    public HttpHeader(HttpVersion vers) {
+        super(vers);
+    }
+
+    /**
+     * Instantiates a new Http header.
+     *
+     * @param statusCode the status code
+     */
+    public HttpHeader(HttpStatusCode statusCode) {
+        super(statusCode);
+    }
+
+    /**
+     * Instantiates a new Http header.
+     *
+     * @param vers the vers
+     * @param statusCode the status code
+     */
     public HttpHeader(HttpVersion vers, HttpStatusCode statusCode) {
         super(vers, statusCode);
     }
@@ -25,45 +52,53 @@ public class HttpHeader extends AbstractHeader  {
                 append(HttpConstants.NEWLINE);
     }
 
+    @Override
+    public HttpHeaderBuilder getHeaderBuilder() {
+        return new HttpHeaderBuilder(this);
+    }
 
-    public class IncomingHttpHeaderBuilder implements IHeaderEncoder{
-        private HttpHeader header;
+    /**
+     * The type Http header builder.
+     * @param <T>  the type parameter
+     */
+    public class HttpHeaderBuilder<T extends AbstractHeader> implements IHeaderEncoder{
+        private T $instance;
 
-        public IncomingHttpHeaderBuilder(HttpHeader header){
-            this.header = header;
+        /**
+         * Instantiates a new Http header builder.
+         * Note: this class takes in an instance of the outer class in so that it can be initiated
+         * from outside this class.
+         * @param header the header
+         */
+        public HttpHeaderBuilder(T header){
+            this.$instance = header;
         }
 
-        public IncomingHttpHeaderBuilder setHttpVers(HttpVersion httpVers){
-            header.setHttpVers(httpVers);
+        /**
+         * Set http vers.
+         *
+         * @param httpVers the http vers
+         * @return the http header builder
+         */
+        public HttpHeaderBuilder setHttpVers(HttpVersion httpVers){
+            $instance.setHttpVers(httpVers);
             return this;
         }
 
-        public IncomingHttpHeaderBuilder  setStatusCode(HttpStatusCode statusCode){
-            header.setStatusCode(statusCode);
+        /**
+         * Set status code.
+         *
+         * @param statusCode the status code
+         * @return the http header builder
+         */
+        public HttpHeaderBuilder setStatusCode(HttpStatusCode statusCode){
+            $instance.setStatusCode(statusCode);
             return this;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof DefaultHttpHeaderBuilder)) return false;
-
-            DefaultHttpHeaderBuilder that = (DefaultHttpHeaderBuilder) o;
-
-            if (header != null ? !header.equals(that.header) : that.header != null) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return header != null ? header.hashCode() : 0;
         }
 
         @Override
         public StringBuilder encode() {
-            return header.encode();
+            return $instance.encode();
         }
-
     }
 }
