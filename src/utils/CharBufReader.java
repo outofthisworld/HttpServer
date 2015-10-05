@@ -1,13 +1,14 @@
-package http.header;
+package utils;
+
+import http.constants.HttpConstants;
 
 import java.nio.CharBuffer;
-import java.util.Optional;
 
 
 /**
  * The type Char buf reader.
  */
-final class CharBufReader {
+public final class CharBufReader {
     private final CharBuffer chrBuf;
     private int markPosition;
 
@@ -21,7 +22,7 @@ final class CharBufReader {
     }
 
     /**
-     * Returns true if the char buffer has more characters remaining.
+     * Returns true if the underlying character buffer has remaining characters.
      *
      * @return the boolean
      */
@@ -30,7 +31,7 @@ final class CharBufReader {
     }
 
     /**
-     * Reads the next char in the buffer and then rolls back the position
+     * Reads the next char in the underlying buffer and then rolls back the position.
      *
      * @return the int
      */
@@ -50,6 +51,9 @@ final class CharBufReader {
      * @param num the num
      */
     public void skipForward(int num){
+        if(getPosition() + num > chrBuf.limit())
+            throw new IllegalArgumentException("Illegal argument");
+
         this.chrBuf.position(this.chrBuf.position()+num);
     }
 
@@ -60,6 +64,7 @@ final class CharBufReader {
      * Attempts to find the seperator in the char buffer and returns the index of the seperator should it exist, else -1.
      *
      * @param c the c
+     * @param resetPosition the reset position
      * @return the int
      */
     public int peek(char c, boolean resetPosition){
@@ -76,6 +81,11 @@ final class CharBufReader {
         return -1;
     }
 
+    /**
+     * Get position.
+     *
+     * @return the int
+     */
     public int getPosition(){
         return chrBuf.position();
     }
@@ -86,17 +96,15 @@ final class CharBufReader {
      * @param high the high
      * @return the optional
      */
-    public Optional<String> extract(int high){
-        if(high > chrBuf.limit() || high < chrBuf.position()) {
-            System.out.println("High below chrbuf pos");
-            return Optional.empty();
-        }
-        System.out.println("moving forward " + (high-chrBuf.position()) + " spaces");
+    public String extract(int high){
+        if(high > chrBuf.limit() || high < chrBuf.position())
+            throw new IllegalArgumentException("Illegal argument exception");
+
         char[] buffer = new char[high-chrBuf.position()];
         for(int i = 0; i < high-chrBuf.position();i++){
             buffer[i] = (char)readNext();
         }
-        return Optional.of(new String(buffer));
+        return new String(buffer);
     }
 
     /**
@@ -106,16 +114,35 @@ final class CharBufReader {
      * @param high the high
      * @return the optional
      */
-    public Optional<String> extract(int low,int high){
+    public String extract(int low,int high){
         if(low < 0 || high > chrBuf.limit() || high < low)
-            return Optional.empty();
+            throw new IllegalArgumentException("Illegal argument exception");
 
         chrBuf.position(low);
         char[] buffer = new char[high-low];
         for(int i = 0; i < high-low;i++){
             buffer[i] = (char)readNext();
         }
-        return Optional.of(new String(buffer));
+        return new String(buffer);
+    }
+
+    /**
+     * Has next line.
+     *
+     * @return the boolean
+     */
+    public boolean hasNextLine(){
+        return peek(HttpConstants.NEWLINE_CHAR, true) != -1;
+    }
+
+    /**
+     * Has next.
+     *
+     * @param c the c
+     * @return the boolean
+     */
+    public boolean hasNext(char c){
+        return peek(c, true) != -1;
     }
 
     /**
