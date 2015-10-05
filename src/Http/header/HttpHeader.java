@@ -7,7 +7,7 @@ import http.constants.HttpVersion;
 /**
  * Created by daleappleby on 4/10/15.
  */
-public class HttpHeader extends AbstractHeader  {
+public class HttpHeader extends AbstractHeader {
 
     /**
      * Instantiates a new Http header.
@@ -37,7 +37,7 @@ public class HttpHeader extends AbstractHeader  {
     /**
      * Instantiates a new Http header.
      *
-     * @param vers the vers
+     * @param vers       the vers
      * @param statusCode the status code
      */
     public HttpHeader(HttpVersion vers, HttpStatusCode statusCode) {
@@ -54,23 +54,25 @@ public class HttpHeader extends AbstractHeader  {
 
     @Override
     public HttpHeaderBuilder getHeaderBuilder() {
-        return new HttpHeaderBuilder(this);
+        return new HttpHeaderBuilder<HttpHeader>(this);
     }
 
     /**
      * The type Http header builder.
-     * @param <T>  the type parameter
+     *
+     * @param <T> the type parameter
      */
-    public class HttpHeaderBuilder<T extends AbstractHeader> implements IHeaderEncoder{
+    public class HttpHeaderBuilder<T extends AbstractHeader> implements IHeaderEncoder {
         private T $instance;
 
         /**
          * Instantiates a new Http header builder.
          * Note: this class takes in an instance of the outer class in so that it can be initiated
          * from outside this class.
+         *
          * @param header the header
          */
-        public HttpHeaderBuilder(T header){
+        public HttpHeaderBuilder(T header) {
             this.$instance = header;
         }
 
@@ -80,7 +82,7 @@ public class HttpHeader extends AbstractHeader  {
          * @param httpVers the http vers
          * @return the http header builder
          */
-        public HttpHeaderBuilder setHttpVers(HttpVersion httpVers){
+        public HttpHeaderBuilder<? extends AbstractHeader> setHttpVers(HttpVersion httpVers) {
             $instance.setHttpVers(httpVers);
             return this;
         }
@@ -91,7 +93,7 @@ public class HttpHeader extends AbstractHeader  {
          * @param statusCode the status code
          * @return the http header builder
          */
-        public HttpHeaderBuilder setStatusCode(HttpStatusCode statusCode){
+        public HttpHeaderBuilder<? extends AbstractHeader> setStatusCode(HttpStatusCode statusCode) {
             $instance.setStatusCode(statusCode);
             return this;
         }

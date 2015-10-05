@@ -27,7 +27,7 @@ public final class CharBufReader {
      * @return the boolean
      */
     public boolean hasNext(){
-        return chrBuf.hasRemaining();
+        return getChrBuf().hasRemaining();
     }
 
     /**
@@ -39,8 +39,8 @@ public final class CharBufReader {
         if(!hasNext())
             return -1;
 
-        char c = chrBuf.get();
-        chrBuf.position(chrBuf.position()-1);
+        char c = getChrBuf().get();
+        getChrBuf().position(getChrBuf().position() - 1);
         return c;
     }
 
@@ -51,10 +51,10 @@ public final class CharBufReader {
      * @param num the num
      */
     public void skipForward(int num){
-        if(getPosition() + num > chrBuf.limit())
+        if(getPosition() + num > getChrBuf().limit())
             throw new IllegalArgumentException("Illegal argument");
 
-        this.chrBuf.position(this.chrBuf.position()+num);
+        this.getChrBuf().position(this.getChrBuf().position() + num);
     }
 
 
@@ -76,7 +76,7 @@ public final class CharBufReader {
             }
         }
         if(resetPosition)
-            chrBuf.position(startPos);
+            getChrBuf().position(startPos);
 
         return -1;
     }
@@ -87,7 +87,7 @@ public final class CharBufReader {
      * @return the int
      */
     public int getPosition(){
-        return chrBuf.position();
+        return getChrBuf().position();
     }
 
     /**
@@ -97,11 +97,11 @@ public final class CharBufReader {
      * @return the optional
      */
     public String extract(int high){
-        if(high > chrBuf.limit() || high < chrBuf.position())
+        if(high > getChrBuf().limit() || high < getChrBuf().position())
             throw new IllegalArgumentException("Illegal argument exception");
 
-        char[] buffer = new char[high-chrBuf.position()];
-        for(int i = 0; i < high-chrBuf.position();i++){
+        char[] buffer = new char[high- getChrBuf().position()];
+        for(int i = 0; i < high- getChrBuf().position();i++){
             buffer[i] = (char)readNext();
         }
         return new String(buffer);
@@ -115,15 +115,36 @@ public final class CharBufReader {
      * @return the optional
      */
     public String extract(int low,int high){
-        if(low < 0 || high > chrBuf.limit() || high < low)
+        if(low < 0 || high > getChrBuf().limit() || high < low)
             throw new IllegalArgumentException("Illegal argument exception");
 
-        chrBuf.position(low);
+        getChrBuf().position(low);
         char[] buffer = new char[high-low];
         for(int i = 0; i < high-low;i++){
             buffer[i] = (char)readNext();
         }
         return new String(buffer);
+    }
+
+
+    /**
+     * Current string.
+     *
+     * @return the string
+     */
+    public String currentString(){
+        char[] buffer = new char[chrBuf.position()];
+        for(int i = 0; i < getChrBuf().position();i++){
+            buffer[i] = (char)readNext();
+        }
+        return new String(buffer);
+    }
+
+    /**
+     * Read line.
+     */
+    public void readLine(){
+        peek(HttpConstants.NEWLINE_CHAR, false);
     }
 
     /**
@@ -145,12 +166,16 @@ public final class CharBufReader {
         return peek(c, true) != -1;
     }
 
+    public boolean hasNextBefore(char nextChar,char beforeChar ){
+        return true;
+    }
+
     /**
      * Resets the readers position to the buffers mark
      * Reset position to mark.
      */
     public void resetPositionToMark(){
-        chrBuf.reset();
+        getChrBuf().reset();
     }
 
     /**
@@ -158,8 +183,8 @@ public final class CharBufReader {
      * Mark position.
      */
     public void markPosition(){
-        markPosition = chrBuf.position();
-        chrBuf.mark();
+        setMarkPosition(getChrBuf().position());
+        getChrBuf().mark();
     }
 
     /**
@@ -186,6 +211,15 @@ public final class CharBufReader {
      * @return the int
      */
     public int readNext(){
-        return chrBuf.get();
+        return getChrBuf().get();
+    }
+
+    /**
+     * Gets chr buf.
+     *
+     * @return the chr buf
+     */
+    public CharBuffer getChrBuf() {
+        return chrBuf;
     }
 }

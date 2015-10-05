@@ -16,7 +16,8 @@ public class OutgoingHttpHeader extends HttpHeader {
     private Date date;
     private String contentType;
 
-    public OutgoingHttpHeader(){}
+    public OutgoingHttpHeader() {
+    }
 
     public OutgoingHttpHeader(HttpVersion vers) {
         super(vers);
@@ -80,7 +81,7 @@ public class OutgoingHttpHeader extends HttpHeader {
      */
     public void setContentType(MimeTypes... contentType) {
         this.contentType = String.join(";", Arrays.copyOfRange(
-                Stream.of(contentType).map(e -> e.mimeType).toArray(),0,contentType.length,String[].class)
+                        Stream.of(contentType).map(e -> e.mimeType).toArray(), 0, contentType.length, String[].class)
         );
     }
 
@@ -117,8 +118,8 @@ public class OutgoingHttpHeader extends HttpHeader {
 
     @Override
     public StringBuilder encode() {
-         return super.encode().append(HttpHeaderConstants.CONTENT_TYPE.name).
-                 append(getContentType()).append(HttpHeaderConstants.DATE.name).append(getDate());
+        return super.encode().append(HttpHeaderConstants.CONTENT_TYPE.name).
+                append(getContentType()).append(HttpHeaderConstants.DATE.name).append(getDate());
     }
 
     @Override

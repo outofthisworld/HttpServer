@@ -11,12 +11,20 @@ public interface IHttpHeaderReader {
     public static final byte PEEK_NONE = 6;
 
     public int state();
+
     public void proceed();
+
     public boolean hasNext();
+
     public void extract();
+
     public void peekInterest();
+
     public void reset();
+
     public void mark();
+
     public void setSeperator(char character);
+
     public void resetIndexCharCount();
 }

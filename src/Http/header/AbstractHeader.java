@@ -8,7 +8,7 @@ import java.util.HashMap;
 /**
  * Created by daleappleby on 3/10/15.
  */
-public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, IDefaultHeaderBuilder{
+public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, IDefaultHeaderBuilder {
     private final HashMap<String, String> headerTags = new HashMap<>();
     private HttpVersion httpVers;
     private HttpStatusCode statusCode;
@@ -16,30 +16,34 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
     /**
      * Instantiates a new Abstract header.
      */
-    public AbstractHeader(){}
+    public AbstractHeader() {
+    }
 
+
+    /**
+     * Instantiates a new Abstract header.
+     *
+     * @param vers       the vers
+     * @param statusCode the status code
+     */
+    public AbstractHeader(HttpVersion vers, HttpStatusCode statusCode) {
+    }
 
     /**
      * Instantiates a new Abstract header.
      *
      * @param vers the vers
-     * @param statusCode the status code
      */
-    public AbstractHeader(HttpVersion vers,HttpStatusCode statusCode){}
-
-    /**
-     * Instantiates a new Abstract header.
-     *
-     * @param vers the vers
-     */
-    public AbstractHeader(HttpVersion vers){}
+    public AbstractHeader(HttpVersion vers) {
+    }
 
     /**
      * Instantiates a new Abstract header.
      *
      * @param statusCode the status code
      */
-    public AbstractHeader(HttpStatusCode statusCode){}
+    public AbstractHeader(HttpStatusCode statusCode) {
+    }
 
     /**
      * Gets http vers.
@@ -48,6 +52,11 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
      */
     public HttpVersion getHttpVers() {
         return httpVers;
+    }
+
+    @Override
+    public void setHttpVers(HttpVersion httpVers) {
+        this.httpVers = httpVers;
     }
 
     /**
@@ -59,6 +68,10 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
         return this.statusCode;
     }
 
+    @Override
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
 
     public HashMap<String, String> getHeaderTags() {
         return headerTags;
@@ -77,22 +90,11 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
     /**
      * Put header.
      *
-     * @param headerTag the header tag
+     * @param headerTag   the header tag
      * @param headerValue the header value
      */
     public void putHeader(String headerTag, String headerValue) {
         headerTags.put(headerTag, headerValue);
-    }
-
-    @Override
-    public void setHttpVers(HttpVersion httpVers) {
-        this.httpVers = httpVers;
-    }
-
-
-    @Override
-    public void setStatusCode(HttpStatusCode statusCode) {
-        this.statusCode = statusCode;
     }
 
     @Override
