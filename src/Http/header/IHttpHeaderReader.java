@@ -15,8 +15,8 @@ public interface IHttpHeaderReader {
     public boolean hasNext();
     public void extract();
     public void peekInterest();
-    public void decodeChar(char chr);
     public void reset();
     public void mark();
-    public void setIndexChar(char charr);
+    public void setSeperator(char character);
+    public void resetIndexCharCount();
 }

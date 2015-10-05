@@ -1,4 +1,4 @@
-import http.header.HttpHeaderReader;
+import http.header.HttpHeaderDecoder;
 import utils.Configuration;
 
 import java.io.IOException;
@@ -80,7 +80,7 @@ public class HttpServer implements Runnable {
             return;
         }
 
-        HttpHeaderReader httpHeaderReader = new HttpHeaderReader();
+        HttpHeaderDecoder httpHeaderDecoder = new HttpHeaderDecoder();
         //Start accepting connections
         while(isRunning){
             try {
@@ -88,7 +88,7 @@ public class HttpServer implements Runnable {
 
                 //We have received a connection... log it
                 logger.log(Level.INFO, "Received connection from " + socket.getInetAddress().getHostAddress());
-                httpHeaderReader.decode(socket.getInputStream(), StandardCharsets.UTF_8);
+                httpHeaderDecoder.decode(socket.getInputStream(), StandardCharsets.UTF_8);
 
 
             } catch (IOException e) {
