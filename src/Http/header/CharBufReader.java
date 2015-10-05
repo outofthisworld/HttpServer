@@ -62,7 +62,7 @@ final class CharBufReader {
      * @param c the c
      * @return the int
      */
-    public int peekSeperator(char c,boolean resetPosition){
+    public int peek(char c, boolean resetPosition){
         int startPos = getPosition();
         while(hasNext()){
             char readChar = (char) readNext();

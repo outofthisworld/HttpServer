@@ -16,14 +16,10 @@ import java.util.NoSuchElementException;
  * Created by daleappleby on 5/10/15.
  */
 public class HttpHeaderDecoder {
-    private final HttpHeader httpHeader = new HttpHeader();
     private CharBufReader bufRdr;
-    private static final int PEEK_NEWLINE = 0;
-    private static final int PEEK_SEPERATOR = 3;
-    private static final int PEEK_ERROR = 1;
     private int $state;
 
-    public HttpHeader decode(final InputStream in,final Charset encoding) throws IOException {
+    public <T extends AbstractHeader> boolean decode(T httpHeader,final InputStream in,final Charset encoding,boolean lenient) throws IOException {
         final CharBuffer chrBuf = CharBuffer.allocate(Configuration.MAX_HEADER_SIZE);
         bufRdr = new CharBufReader(chrBuf);
         readStream(in, chrBuf, encoding);
@@ -32,8 +28,10 @@ public class HttpHeaderDecoder {
 
         for(int i = 0; i < 2;i++) {
             int mark = bufRdr.getMarkPosition();
-            int idx =  bufRdr.peekSeperator(HttpConstants.SPACE_CHAR, true);
-            checkErrorState(idx);
+            int idx =  bufRdr.peek(HttpConstants.SPACE_CHAR, true);
+
+            if(idx == -1) return false;
+
             switch(i) {
                 case 0: httpHeader.putHeader(
                         HttpHeaderConstants.METHOD.name, bufRdr.extract(mark, idx).get()
@@ -47,21 +45,21 @@ public class HttpHeaderDecoder {
             bufRdr.markPosition();
         }
 
-        checkErrorState(bufRdr.peekSeperator(HttpConstants.NEWLINE_CHAR, false));
+        bufRdr.peek(HttpConstants.NEWLINE_CHAR, false);
 
         int idx = 0;
         for(; bufRdr.hasNext();){
             char c =  (char) bufRdr.readNext();
             try {
                 System.out.println("Currently at: " +chrBuf.position());
-                String key = bufRdr.extract(idx = bufRdr.peekSeperator(HttpConstants.COLON_CHAR, false)).get();
+                String key = bufRdr.extract(idx = bufRdr.peek(HttpConstants.COLON_CHAR, false)).get();
                 System.out.println("Attempting to move to :" + idx);
                 System.out.println("Now at " + chrBuf.position());
 
-                if(bufRdr.peekSeperator(HttpConstants.NEWLINE_CHAR,true) != -1){
+                if(bufRdr.peek(HttpConstants.NEWLINE_CHAR, true) != -1){
 
                 }
-                String value = bufRdr.extract(idx = bufRdr.peekSeperator(HttpConstants.NEWLINE_CHAR,false)).get();
+                String value = bufRdr.extract(idx = bufRdr.peek(HttpConstants.NEWLINE_CHAR, false)).get();
                 System.out.println("Attempting to move to :" + idx);
                 System.out.println("Now at " + chrBuf.position());
                 System.out.println(key);
@@ -71,15 +69,10 @@ public class HttpHeaderDecoder {
                 System.out.println("Error" + idx);
             }
         }
-        return httpHeader;
+        return true;
     }
 
 
-    public void checkErrorState(int idx){
-        if(idx == -1){
-            $state = PEEK_ERROR;
-        }
-    }
 
     private void readStream(final InputStream in,final CharBuffer chrBuf,final Charset encoding) throws IOException {
         new BufferedReader(new InputStreamReader(in, encoding)).read(chrBuf);
