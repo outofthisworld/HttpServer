@@ -1,4 +1,4 @@
-package utils;
+package http;
 
 /**
  * Created by daleappleby on 3/10/15.

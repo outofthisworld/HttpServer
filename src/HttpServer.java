@@ -1,7 +1,6 @@
-import http.header.DefaultHttpHeader;
+import http.header.HttpHeaderReader;
 import utils.Configuration;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -24,7 +23,10 @@ public class HttpServer implements Runnable {
     protected HttpServer(){}
 
     public static void main(String[] args) {
+
         startNewHttpServer();
+
+
     }
 
     public static HttpServer startNewHttpServer(){
@@ -78,6 +80,7 @@ public class HttpServer implements Runnable {
             return;
         }
 
+        HttpHeaderReader httpHeaderReader = new HttpHeaderReader();
         //Start accepting connections
         while(isRunning){
             try {
@@ -85,20 +88,8 @@ public class HttpServer implements Runnable {
 
                 //We have received a connection... log it
                 logger.log(Level.INFO, "Received connection from " + socket.getInetAddress().getHostAddress());
+                httpHeaderReader.decode(socket.getInputStream(), StandardCharsets.UTF_8);
 
-                //Create a buffered input stream to read incoming packets
-                BufferedInputStream bufferedInputStream = new BufferedInputStream(socket.getInputStream());
-
-                //Byte buffer to hold the header
-                byte[] buffer = new byte[Configuration.MAX_HEADER_SIZE];
-
-                //Read the header into the buffer
-                bufferedInputStream.read(buffer,0,buffer.length);
-
-                //Create a string from the header
-                String header = new String(buffer,0,buffer.length, StandardCharsets.UTF_8);
-
-                DefaultHttpHeader defaultHttpHeader = new DefaultHttpHeader();
 
             } catch (IOException e) {
                 e.printStackTrace();

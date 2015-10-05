@@ -11,67 +11,67 @@ import java.util.stream.Stream;
 /**
  * Created by daleappleby on 3/10/15.
  */
-public class ResponseBuilder {
+public class HttpResponseBuilder {
     private HttpStatusCode responseCode;
-    private String httpVers = "";
+    private String httpVers;
     private Date date;
-    private String contentType = "";
-    private String allowMethods = "";
-    private String body = "";
-    private int contentLength = 0;
-    private String server = "";
+    private String contentType;
+    private String allowMethods;
+    private String body;
+    private int contentLength;
+    private String server;
 
-    public ResponseBuilder(){}
+    public HttpResponseBuilder(){}
 
-    public ResponseBuilder setHttpVers(String vers){
+    public HttpResponseBuilder setHttpVers(String vers){
         this.httpVers = vers.replaceAll(Delimiters.NEWLINE,Delimiters.EMPTY);
         return this;
     }
 
-    public ResponseBuilder setHttpResponseCode(HttpStatusCode httpStatusCode){
+    public HttpResponseBuilder setHttpResponseCode(HttpStatusCode httpStatusCode){
         this.responseCode = httpStatusCode;
         return this;
     }
 
-    public ResponseBuilder setContentType(String contentType){
+    public HttpResponseBuilder setContentType(String contentType){
         this.contentType = contentType.replaceAll(Delimiters.NEWLINE,Delimiters.EMPTY);
         return this;
     }
 
-    public ResponseBuilder setAllow(HttpMethods method){
+    public HttpResponseBuilder setAllow(HttpMethods method){
         allowMethods = method.name();
         return this;
     }
 
-    public ResponseBuilder setAllow(HttpMethods[] methods){
+    public HttpResponseBuilder setAllow(HttpMethods[] methods){
         allowMethods = String.join(Delimiters.COMMA,  Arrays.copyOfRange(Stream.of(methods).map(m->m.name().toString()).toArray(),0,methods.length,String[].class));
         return this;
     }
 
-    public ResponseBuilder setConnection(String connection){
+    public HttpResponseBuilder setConnection(String connection){
         return null;
     }
 
-    public ResponseBuilder setCacheControl(String cacheControl){
+    public HttpResponseBuilder setCacheControl(String cacheControl){
         return null;
     }
 
-    public ResponseBuilder setContentLength(int contentLength){
+    public HttpResponseBuilder setContentLength(int contentLength){
         this.contentLength = contentLength;
         return this;
     }
 
-    public ResponseBuilder setDate(Date date){
+    public HttpResponseBuilder setDate(Date date){
         this.date = date;
         return this;
     }
 
-    public ResponseBuilder setBody(String body){
+    public HttpResponseBuilder setBody(String body){
         this.body = body;
         return this;
     }
 
-    public ResponseBuilder setServer(String server){
+    public HttpResponseBuilder setServer(String server){
         this.server = server;
         return this;
     }

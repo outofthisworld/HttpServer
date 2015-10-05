@@ -5,14 +5,14 @@ import utils.Delimiters;
 /**
  * Created by daleappleby on 3/10/15.
  */
-class HeaderReader {
+class HttpHeaderParser {
     private String[] headerLines;
     private char[][] chars;
 
     //The position
     private int pos = 0;
 
-    public HeaderReader(String string){
+    public HttpHeaderParser(String string){
         parseHeader(string);
     }
 
