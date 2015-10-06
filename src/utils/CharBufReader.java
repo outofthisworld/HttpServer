@@ -69,17 +69,23 @@ public final class CharBufReader {
      */
     public int peek(char c, boolean resetPosition){
         int startPos = getPosition();
+        int place = -1;
         while(hasNext()){
             char readChar = (char) readNext();
             if(readChar == c) {
-                return getPosition();
+                place =  getPosition();
+                break;
             }
         }
-        if(resetPosition)
-            getChrBuf().position(startPos);
-
-        return -1;
+        if(resetPosition) setPosition(startPos);
+        return place;
     }
+
+
+    private final void setPosition(int n){
+        getChrBuf().position(n);
+    }
+
 
     /**
      * Get position.
@@ -133,18 +139,22 @@ public final class CharBufReader {
      * @return the string
      */
     public String currentString(){
-        char[] buffer = new char[chrBuf.position()];
-        for(int i = 0; i < getChrBuf().position();i++){
+        int startPos = getChrBuf().position();
+        char[] buffer = new char[startPos];
+        getChrBuf().position(0);
+        for(int i = 0; i < startPos;i++){
             buffer[i] = (char)readNext();
         }
+        getChrBuf().position(0);
         return new String(buffer);
     }
 
     /**
      * Read line.
+     * @return the string
      */
-    public void readLine(){
-        peek(HttpConstants.NEWLINE_CHAR, false);
+    public String readLine() {
+        return extract(peek(HttpConstants.NEWLINE_CHAR, false));
     }
 
     /**
@@ -166,6 +176,13 @@ public final class CharBufReader {
         return peek(c, true) != -1;
     }
 
+    /**
+     * Has next before.
+     *
+     * @param nextChar the next char
+     * @param beforeChar the before char
+     * @return the boolean
+     */
     public boolean hasNextBefore(char nextChar,char beforeChar ){
         return true;
     }
@@ -212,6 +229,13 @@ public final class CharBufReader {
      */
     public int readNext(){
         return getChrBuf().get();
+    }
+
+    /**
+     * Reset to start.
+     */
+    public void resetToStart(){
+        getChrBuf().position(0);
     }
 
     /**

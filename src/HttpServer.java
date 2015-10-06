@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -83,6 +82,7 @@ public class HttpServer implements Runnable {
         }
 
         HttpHeaderDecoder httpHeaderDecoder = new HttpHeaderDecoder();
+        HttpHeader httpHeader = new HttpHeader();
         //Start accepting connections
         while(isRunning){
             try {
@@ -90,11 +90,9 @@ public class HttpServer implements Runnable {
 
                 //We have received a connection... log it
                 logger.log(Level.INFO, "Received connection from " + socket.getInetAddress().getHostAddress());
-                HttpHeader httpHeader = httpHeaderDecoder.decode(socket.getInputStream(), StandardCharsets.UTF_8);
+                httpHeaderDecoder.decode(httpHeader,socket.getInputStream(), StandardCharsets.UTF_8,true);
 
-                for(Map.Entry<String,String> entry:httpHeader.getHeaderTags().entrySet()){
-                    System.out.println("key ==== " +entry.getKey() + " value === " + entry.getValue());
-                }
+
                 isRunning=false;
 
 

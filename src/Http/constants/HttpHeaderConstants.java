@@ -8,10 +8,10 @@ public enum HttpHeaderConstants {
    CONTENT_LENGTH("Content-length"),
    ALLOW("Allow"),
    SERVER("Server"),
-    DATE("Date"),
-    METHOD("Method"),
-    RESOURCE("Resource"),
-    HTTP_VERS("Http-vers");
+   DATE("Date"),
+   METHOD("Method"),
+   RESOURCE("Resource"),
+   HTTP_VERS("Http-vers");
 
     public String name;
     HttpHeaderConstants(String name){
