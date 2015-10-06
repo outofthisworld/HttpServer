@@ -1,6 +1,5 @@
 package test;
 
-import com.sun.org.apache.bcel.internal.util.ClassLoader;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
@@ -20,16 +19,17 @@ public class ApplicationTestRunner {
     private static final String _IGNORE = "$";
     private static final String TEST_DIRECTORY = "test";
     private static final String PACKAGE_SEP = ".";
+    private static StringBuffer currentDir = new StringBuffer();
 
     public static void main(String[] args) {
         ArrayList<Class<?>> classList = new ArrayList<>();
 
         try {
-            Files.walkFileTree(Paths.get(ApplicationTestRunner.class.getProtectionDomain().getCodeSource()
-                    .getLocation().getPath() + TEST_DIRECTORY), new FileVisitor<Path>() {
-
+            Path path = Paths.get(ApplicationTestRunner.class.getProtectionDomain().getCodeSource().getLocation().getPath() + TEST_DIRECTORY);
+            Files.walkFileTree(path, new FileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                    currentDir.append(dir.getFileName()+PACKAGE_SEP);
                     return FileVisitResult.CONTINUE;
                 }
 
@@ -40,9 +40,8 @@ public class ApplicationTestRunner {
                             && (!file.getFileName().toString().contains(ApplicationTestRunner.class.getSimpleName() + CLASS)
                             && !file.getFileName().toString().contains(SUITE_END_NAME) && !file.getFileName().toString().contains(_IGNORE))) {
                         try {
-
-                       
-                            classList.add(c);
+                            String klazz = file.getFileName().toString().replace(".class","");
+                            classList.add(Class.forName(currentDir+klazz));
                         } catch (ClassNotFoundException e) {
                             e.printStackTrace();
                         }
@@ -57,6 +56,7 @@ public class ApplicationTestRunner {
 
                 @Override
                 public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    currentDir.append(currentDir.toString().replaceAll(dir.getFileName()+PACKAGE_SEP,""));
                     return FileVisitResult.CONTINUE;
                 }
             });
@@ -66,12 +66,13 @@ public class ApplicationTestRunner {
 
         Result result = JUnitCore.runClasses(Arrays.copyOfRange(classList.toArray(), 0, classList.size(), Class[].class));
 
+        System.out.println("Ran: " + result.getRunCount() + " tests");
+        System.out.println("Returned : " + result.getFailureCount() + " failures");
+
         for (Failure failure : result.getFailures()) {
             System.out.println(failure.toString());
         }
 
-        System.out.println();
-        System.out.println(result.getFailureCount());
-        System.out.println(result.wasSuccessful());
+        System.out.println("Was successful: " + result.wasSuccessful());
     }
 }
