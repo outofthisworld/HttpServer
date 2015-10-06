@@ -1,4 +1,4 @@
-package test;
+package test.utils;
 
 import utils.CharBufReader;
 
@@ -37,15 +37,15 @@ public class CharBufReaderTest {
 
     @org.junit.Test
     public void testPeekNextChar() throws Exception {
-       for(int i = 0;charBufReader.hasNext();i++){
-           assertEquals(charBufReader.peekNextChar(),testString.indexOf(i));
-           charBufReader.readNext();
-        }
+
     }
 
     @org.junit.Test
     public void testSkipForward() throws Exception {
-
+        int pos = charBufReader.getPosition();
+        int skip = 2;
+        charBufReader.skipForward(skip);
+        assertEquals(charBufReader.getPosition(),pos+skip);
     }
 
     @org.junit.Test
@@ -58,17 +58,21 @@ public class CharBufReaderTest {
 
     @org.junit.Test
     public void testGetPosition() throws Exception {
-
+        assertEquals(charBufReader.getPosition(),0);
+        charBufReader.readNext();
+        assertEquals(charBufReader.getPosition(), 1);
     }
 
     @org.junit.Test
     public void testExtract() throws Exception {
-
+        assertEquals(charBufReader.extract(0, 2),testString.substring(0,2));
+        assertEquals(charBufReader.getPosition(),2);
     }
 
     @org.junit.Test
     public void testExtract1() throws Exception {
-
+        assertEquals(charBufReader.extract(0, 2,true),testString.substring(0,2));
+        assertEquals(charBufReader.getPosition(),0);
     }
 
     @org.junit.Test
