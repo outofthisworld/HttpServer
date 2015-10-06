@@ -71,14 +71,23 @@ public final class CharBufReader {
         int startPos = getPosition();
         int place = -1;
         while(hasNext()){
-            char readChar = (char) readNext();
+            char readChar =  getCharAtPosition(0);
             if(readChar == c) {
                 place =  getPosition();
                 break;
             }
+           readChar =  (char) readNext();
         }
         if(resetPosition) setPosition(startPos);
         return place;
+    }
+
+
+    public char getCharAtPosition(int n){
+        if(n < 0 || n > chrBuf.limit())
+            throw new IllegalArgumentException("Invalid args");
+
+        return getChrBuf().get(n);
     }
 
 
@@ -97,24 +106,17 @@ public final class CharBufReader {
     }
 
     /**
-     * Extract optional.
+     *
      *
      * @param high the high
      * @return the optional
      */
     public String extract(int high){
-        if(high > getChrBuf().limit() || high < getChrBuf().position())
-            throw new IllegalArgumentException("Illegal argument exception");
-
-        char[] buffer = new char[high- getChrBuf().position()];
-        for(int i = 0; i < high- getChrBuf().position();i++){
-            buffer[i] = (char)readNext();
-        }
-        return new String(buffer);
+        return extract(getPosition(),high);
     }
 
     /**
-     * Extract optional.
+     *
      *
      * @param low the low
      * @param high the high
@@ -130,6 +132,20 @@ public final class CharBufReader {
             buffer[i] = (char)readNext();
         }
         return new String(buffer);
+    }
+
+    /**
+     *
+     *
+     * @param low the low
+     * @param high the high
+     * @return the optional
+     */
+    public String extract(int low,int high,boolean resetPos){
+        int startPos = getPosition();
+        String extractedString = extract(low,high);
+        if(resetPos) setPosition(startPos);
+        return extractedString;
     }
 
 
@@ -181,10 +197,15 @@ public final class CharBufReader {
      *
      * @param nextChar the next char
      * @param beforeChar the before char
+     * @param resetPosition the reset position
      * @return the boolean
      */
-    public boolean hasNextBefore(char nextChar,char beforeChar ){
-        return true;
+    public boolean hasNextBefore(char nextChar,char beforeChar,boolean resetPosition){
+        int startPos = getChrBuf().position();
+        int beforePos = peek(beforeChar,false);
+        int afterPos = peek(nextChar,false);
+        if(resetPosition) setPosition(startPos);
+        return (beforePos != -1 && afterPos != -1) && (beforePos < afterPos);
     }
 
     /**
