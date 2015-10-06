@@ -22,57 +22,61 @@ public class ApplicationTestRunner {
     private static StringBuffer currentDir = new StringBuffer();
 
     public static void main(String[] args) {
-        ArrayList<Class<?>> classList = new ArrayList<>();
-
+        TestClassVisitor testClassVisitor = new TestClassVisitor();
         try {
-            Path path = Paths.get(ApplicationTestRunner.class.getProtectionDomain().getCodeSource().getLocation().getPath() + TEST_DIRECTORY);
-            Files.walkFileTree(path, new FileVisitor<Path>() {
-                @Override
-                public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-                    currentDir.append(dir.getFileName()+PACKAGE_SEP);
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-
-                    if (file.getFileName().toString().endsWith(CLASS)
-                            && (!file.getFileName().toString().contains(ApplicationTestRunner.class.getSimpleName() + CLASS)
-                            && !file.getFileName().toString().contains(SUITE_END_NAME) && !file.getFileName().toString().contains(_IGNORE))) {
-                        try {
-                            String klazz = file.getFileName().toString().replace(".class","");
-                            classList.add(Class.forName(currentDir+klazz));
-                        } catch (ClassNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
-                    return FileVisitResult.CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    currentDir.append(currentDir.toString().replaceAll(dir.getFileName()+PACKAGE_SEP,""));
-                    return FileVisitResult.CONTINUE;
-                }
-            });
+            Path path = Paths.get(ApplicationTestRunner.class.getProtectionDomain()
+                    .getCodeSource().getLocation().getPath() + TEST_DIRECTORY);
+            Files.walkFileTree(path, );
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Result result = JUnitCore.runClasses(Arrays.copyOfRange(classList.toArray(), 0, classList.size(), Class[].class));
+        Result result = JUnitCore.runClasses(
+                Arrays.copyOfRange(testClassVisitor.classList.toArray(), 0, testClassVisitor.classList.size(), Class[].class)
+        );
 
         System.out.println("Ran: " + result.getRunCount() + " tests");
         System.out.println("Returned : " + result.getFailureCount() + " failures");
-
         for (Failure failure : result.getFailures()) {
             System.out.println(failure.toString());
         }
-
         System.out.println("Was successful: " + result.wasSuccessful());
+    }
+
+    private static class TestClassVisitor implements FileVisitor<Path> {
+        private final ArrayList<Class<?>> classList = new ArrayList<>();
+
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            currentDir.append(dir.getFileName() + PACKAGE_SEP);
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+
+            if (file.getFileName().toString().endsWith(CLASS)
+                    && (!file.getFileName().toString().contains(ApplicationTestRunner.class.getSimpleName() + CLASS)
+                    && !file.getFileName().toString().contains(SUITE_END_NAME) && !file.getFileName().toString().contains(_IGNORE))) {
+                try {
+                    String klazz = file.getFileName().toString().replace(".class", "");
+                    classList.add(Class.forName(currentDir + klazz));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+            return FileVisitResult.CONTINUE;
+        }
+
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            currentDir.append(currentDir.toString().replaceAll(dir.getFileName() + PACKAGE_SEP, ""));
+            return FileVisitResult.CONTINUE;
+        }
     }
 }

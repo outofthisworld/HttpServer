@@ -22,5 +22,5 @@ public enum HttpMethods {
     /**
      * The DELETE.
      */
-    DELETE;
+    DELETE
 }
