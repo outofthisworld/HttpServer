@@ -1,6 +1,7 @@
 package http.header;
 
 import http.constants.HttpConstants;
+import http.constants.HttpMethods;
 import http.constants.HttpStatusCode;
 import http.constants.HttpVersion;
 
@@ -55,6 +56,16 @@ public class HttpHeader extends AbstractHeader {
     @Override
     public HttpHeaderBuilder getHeaderBuilder() {
         return new HttpHeaderBuilder<HttpHeader>(this);
+    }
+
+    @Override
+    public void setRequestMethod(HttpMethods method) {
+
+    }
+
+    @Override
+    public HttpMethods getRequestMethod(HttpMethods method) {
+        return null;
     }
 
     /**

@@ -1,5 +1,6 @@
 package http.header;
 
+import http.constants.HttpHeaderConstants;
 import http.constants.HttpStatusCode;
 import http.constants.HttpVersion;
 
@@ -9,7 +10,7 @@ import java.util.HashMap;
  * Created by daleappleby on 3/10/15.
  */
 public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, IDefaultHeaderBuilder {
-    private final HashMap<String, String> headerTags = new HashMap<>();
+    private final HashMap<HttpHeaderConstants, String> headerTags = new HashMap<>();
     private HttpVersion httpVers;
     private HttpStatusCode statusCode;
 
@@ -77,7 +78,7 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
      *
      * @return the header tags
      */
-    public HashMap<String, String> getHeaderTags() {
+    public HashMap<? extends HttpHeaderConstants, String> getHeaderTags() {
         return headerTags;
     }
 
@@ -97,7 +98,7 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
      * @param headerTag the header tag
      * @param headerValue the header value
      */
-    public void putHeader(String headerTag, String headerValue) {
+    public void putHeader(HttpHeaderConstants headerTag, String headerValue) {
         headerTags.put(headerTag, headerValue);
     }
 

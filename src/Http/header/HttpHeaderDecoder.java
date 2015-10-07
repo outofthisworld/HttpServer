@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 import static http.constants.HttpConstants.*;
 
@@ -39,20 +40,21 @@ public class HttpHeaderDecoder implements HeaderDecoder {
     private int line;
     private int space;
 
-    public <T extends AbstractHeader> HttpStatusCode decode(T httpHeaderIn, final InputStream in, final Charset encoding, boolean lenient) throws IOException {
+    public <T extends AbstractHeader> void decode(T httpHeaderIn, final InputStream in, final Charset encoding, boolean lenient) throws IOException {
         final CharBuffer chrBuf = CharBuffer.allocate(Configuration.MAX_HEADER_SIZE);
         bufRdr = new CharBufReader(chrBuf);
         readStream(in, chrBuf, encoding);
         httpHeader = httpHeaderIn;
 
         if(!bufRdr.hasNextBefore(HttpConstants.SPACE_CHAR,HttpConstants.SPACE_CHAR,true))
-            return HttpStatusCode.BAD_REQUEST;
+            httpHeader.setStatusCode(HttpStatusCode.BAD_REQUEST);
 
         HttpMethods reqMethod;
         if((reqMethod = determineRequestMethod()) != null) {
-            httpHeader.putHeader(HttpHeaderConstants.METHOD.name,reqMethod.name());
+            setRequestMethod(reqMethod);
         }else{
-            return HttpStatusCode.BAD_REQUEST;
+            httpHeader.setStatusCode(HttpStatusCode.BAD_REQUEST);
+            return;
         }
 
         while(bufRdr.hasNext()){
@@ -67,7 +69,7 @@ public class HttpHeaderDecoder implements HeaderDecoder {
         }
 
 
-        return HttpStatusCode.ACCEPTED;
+        httpHeader.setStatusCode(HttpStatusCode.ACCEPTED);
     }
 
     public void decodeChar(int chr) {
@@ -100,7 +102,12 @@ public class HttpHeaderDecoder implements HeaderDecoder {
         bufRdr.peek(HttpConstants.NEWLINE_CHAR,false);
         return method;
     }
-    
+
+    private <T extends HttpMethods> void setRequestMethod(T method){
+        httpHeader.putHeader(HttpHeaderConstants.METHOD,method.name());
+        httpHeader.setRequestMethod(method);
+    }
+
     private void readStream(final InputStream in, final CharBuffer chrBuf, final Charset encoding) throws IOException {
         new BufferedReader(new InputStreamReader(in, encoding)).read(chrBuf);
         chrBuf.flip();
