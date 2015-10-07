@@ -73,7 +73,7 @@ public class HttpHeader extends AbstractHeader {
      *
      * @param <T> the type parameter
      */
-    public class HttpHeaderBuilder<T extends AbstractHeader> implements IHeaderEncoder {
+    public class HttpHeaderBuilder<T extends AbstractHeader> implements IHeaderEncoder,IBuildToHeader {
         private T $instance;
 
         /**
@@ -109,9 +109,16 @@ public class HttpHeader extends AbstractHeader {
             return this;
         }
 
+
         @Override
         public StringBuilder encode() {
             return $instance.encode();
+        }
+
+
+        @Override
+        public T toHeader() {
+            return $instance ;
         }
     }
 }

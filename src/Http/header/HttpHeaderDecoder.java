@@ -21,7 +21,7 @@ public class HttpHeaderDecoder implements HeaderDecoder {
     private CharBufReader bufRdr;
 
     //The http header
-    private AbstractHeader httpHeader;
+    private AbstractHeader httpHeader = new HttpHeader();
 
     //Decoder states
     private static final int PEEK_SPACE = 0;
@@ -36,36 +36,35 @@ public class HttpHeaderDecoder implements HeaderDecoder {
     private int line;
     private int space;
 
-    public <T extends AbstractHeader> void decode(T httpHeaderIn, final InputStream in, final Charset encoding, boolean lenient) throws IOException {
-        final CharBuffer chrBuf = CharBuffer.allocate(Configuration.MAX_HEADER_SIZE);
-        bufRdr = new CharBufReader(chrBuf);
-        readStream(in, chrBuf, encoding);
-        httpHeader = httpHeaderIn;
+    public <T extends AbstractHeader> T decode(final InputStream in, final Charset encoding, boolean lenient) throws IOException {
 
-        if(!bufRdr.hasNextBefore(HttpConstants.SPACE_CHAR,HttpConstants.SPACE_CHAR,true))
+        final CharBuffer chrBuf = CharBuffer.allocate(Configuration.MAX_HEADER_SIZE);
+
+        bufRdr = new CharBufReader(chrBuf);
+
+        readStream(in, chrBuf, encoding);
+
+        if(!bufRdr.hasNextLine() ||
+                !bufRdr.hasNextBefore(HttpConstants.SPACE_CHAR,HttpConstants.SPACE_CHAR,true))
             httpHeader.setStatusCode(HttpStatusCode.BAD_REQUEST);
 
         HttpMethods reqMethod;
-        if((reqMethod = determineRequestMethod()) != null) {
+        if((reqMethod = determineRequestMethod()) != null
+                && checkValidPathStart(bufRdr.readNext())) {
             setRequestMethod(reqMethod);
+            setResourcePath(bufRdr.extract(bufRdr.getPosition(),bufRdr.peek(HttpConstants.SPACE_CHAR,false)));
         }else{
-            httpHeader.setStatusCode(HttpStatusCode.BAD_REQUEST);
-            return;
+            return (T) httpHeader.getHeaderBuilder().setStatusCode(HttpStatusCode.BAD_REQUEST).toHeader();
         }
 
         while(bufRdr.hasNext()){
             decodeChar(bufRdr.readNext());
 
-            if($state == PEEK_NEWLINE){
-
-            }
-
-
 
         }
 
 
-        httpHeader.setStatusCode(HttpStatusCode.ACCEPTED);
+        return (T) httpHeader.getHeaderBuilder().setStatusCode(HttpStatusCode.ACCEPTED).toHeader();
     }
 
     private final void decodeChar(int chr) {
@@ -95,8 +94,16 @@ public class HttpHeaderDecoder implements HeaderDecoder {
                 method = HttpMethods.POST;
                 break;
         }
-        bufRdr.peek(HttpConstants.NEWLINE_CHAR,false);
+        bufRdr.peek(HttpConstants.SPACE_CHAR,false);
         return method;
+    }
+
+    public boolean checkValidPathStart(int c){
+        return (char) c == HttpConstants.SLASH_CHAR?true:false;
+    }
+
+    private final void setResourcePath(String path){
+        httpHeader.putHeader(HttpHeaderConstants.RESOURCE,path);
     }
 
     private final <T extends HttpVersion> void setHttpVersion(T httpVersion){
@@ -110,7 +117,9 @@ public class HttpHeaderDecoder implements HeaderDecoder {
     }
 
     private void readStream(final InputStream in, final CharBuffer chrBuf, final Charset encoding) throws IOException {
-        new BufferedReader(new InputStreamReader(in, encoding)).read(chrBuf);
-        chrBuf.flip();
+        try(BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))){
+            br.read(chrBuf);
+            chrBuf.flip();
+        }
     }
 }

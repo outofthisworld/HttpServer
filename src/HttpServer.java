@@ -1,15 +1,18 @@
+import http.encode.FileCompressions;
 import http.header.HttpHeader;
 import http.header.HttpHeaderDecoder;
 import utils.Configuration;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
 
 
 /**
@@ -23,8 +26,24 @@ public class HttpServer implements Runnable {
 
     protected HttpServer(){}
 
-    public static void main(String[] args) {
-        startNewHttpServer();
+    public static void main(String[] args) throws URISyntaxException {
+        try {
+            File file = new File(HttpServer.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"web/test.html");
+            byte[] bytes = FileCompressions.GZIP(file);
+            System.out.println(new String(bytes));
+            System.out.println(new String(FileCompressions.deGZIP(bytes,(int)file.length())));
+            byte[] delflatedByes = FileCompressions.deflate(file, 8, Deflater.BEST_SPEED);
+            System.out.println(new String(delflatedByes));
+            System.out.println(new String(FileCompressions.inflate(delflatedByes)));
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (DataFormatException e) {
+            e.printStackTrace();
+        }
+        //startNewHttpServer();
     }
 
     public static HttpServer startNewHttpServer(){
@@ -87,7 +106,7 @@ public class HttpServer implements Runnable {
 
                 //We have received a connection... log it
                 logger.log(Level.INFO, "Received connection from " + socket.getInetAddress().getHostAddress());
-                httpHeaderDecoder.decode(httpHeader,socket.getInputStream(), StandardCharsets.UTF_8,true);
+
 
 
 
