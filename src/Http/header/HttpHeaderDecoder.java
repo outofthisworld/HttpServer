@@ -1,9 +1,6 @@
 package http.header;
 
-import http.constants.HttpConstants;
-import http.constants.HttpHeaderConstants;
-import http.constants.HttpMethods;
-import http.constants.HttpStatusCode;
+import http.constants.*;
 import utils.CharBufReader;
 import utils.Configuration;
 
@@ -13,7 +10,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 
 import static http.constants.HttpConstants.*;
 
@@ -72,7 +68,7 @@ public class HttpHeaderDecoder implements HeaderDecoder {
         httpHeader.setStatusCode(HttpStatusCode.ACCEPTED);
     }
 
-    public void decodeChar(int chr) {
+    private final void decodeChar(int chr) {
         if(chr == SPACE_CHAR){
             $state = PEEK_SPACE;
             space++;
@@ -84,7 +80,7 @@ public class HttpHeaderDecoder implements HeaderDecoder {
         }
     }
 
-    private HttpMethods determineRequestMethod(){
+    private final HttpMethods determineRequestMethod(){
         HttpMethods method = null;
         switch(bufRdr.readNext()){
             case 'G':
@@ -103,7 +99,12 @@ public class HttpHeaderDecoder implements HeaderDecoder {
         return method;
     }
 
-    private <T extends HttpMethods> void setRequestMethod(T method){
+    private final <T extends HttpVersion> void setHttpVersion(T httpVersion){
+        httpHeader.putHeader(HttpHeaderConstants.HTTP_VERS,httpVersion.version);
+        httpHeader.setHttpVers(httpVersion);
+    }
+
+    private final <T extends HttpMethods> void setRequestMethod(T method){
         httpHeader.putHeader(HttpHeaderConstants.METHOD,method.name());
         httpHeader.setRequestMethod(method);
     }
