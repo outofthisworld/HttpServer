@@ -1,6 +1,8 @@
 package http.header;
 
+import http.constants.HttpConstants;
 import http.constants.HttpHeaderConstants;
+import http.constants.HttpMethods;
 import http.constants.HttpStatusCode;
 import utils.CharBufReader;
 import utils.Configuration;
@@ -12,73 +14,93 @@ import java.io.InputStreamReader;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
-import static http.constants.HttpConstants.NEWLINE_CHAR;
-import static http.constants.HttpConstants.SPACE_CHAR;
-import static http.constants.HttpHeaderConstants.*;
-import static http.constants.HttpStatusCode.BAD_REQUEST;
+import static http.constants.HttpConstants.*;
 
 /**
  * Created by daleappleby on 5/10/15.
  */
 public class HttpHeaderDecoder implements HeaderDecoder {
+    //The char buf reader.
     private CharBufReader bufRdr;
+
+    //The http header
     private AbstractHeader httpHeader;
+
+    //Decoder states
+    private static final int PEEK_SPACE = 0;
+    private static final int PEEK_NEWLINE = 1;
+    private static final int PEEK_DELIMITER = 2;
+    private static final int PEEK_ERROR = 3;
+
+    //The current state
     private int $state;
 
-    public <T extends AbstractHeader> int decode(T httpHeaderIn, final InputStream in, final Charset encoding, boolean lenient) throws IOException {
+    //The line NO.
+    private int line;
+    private int space;
+
+    public <T extends AbstractHeader> HttpStatusCode decode(T httpHeaderIn, final InputStream in, final Charset encoding, boolean lenient) throws IOException {
         final CharBuffer chrBuf = CharBuffer.allocate(Configuration.MAX_HEADER_SIZE);
         bufRdr = new CharBufReader(chrBuf);
         readStream(in, chrBuf, encoding);
         httpHeader = httpHeaderIn;
 
-        for (int i = 0; i < 3; i++) {
-            int mark = bufRdr.getMarkPosition();
-            int idx = bufRdr.peek(SPACE_CHAR, true);
-            if (idx == -1) return BAD_REQUEST.code;
-            extractTopPart(i, mark, idx);
-            bufRdr.markPosition();
+        if(!bufRdr.hasNextBefore(HttpConstants.SPACE_CHAR,HttpConstants.SPACE_CHAR,true))
+            return HttpStatusCode.BAD_REQUEST;
+
+        HttpMethods reqMethod;
+        if((reqMethod = determineRequestMethod()) != null) {
+            httpHeader.putHeader(HttpHeaderConstants.METHOD.name,reqMethod.name());
+        }else{
+            return HttpStatusCode.BAD_REQUEST;
         }
 
-        System.out.println(httpHeader.getHeader(METHOD.name));
-        System.out.println();
-        System.out.println(httpHeader.getHeader(RESOURCE.name));
-        System.out.println();
-        System.out.println(httpHeader.getHeader(HTTP_VERS.name));
-        System.out.println();
+        while(bufRdr.hasNext()){
+            decodeChar(bufRdr.readNext());
 
-        bufRdr.peek(NEWLINE_CHAR, false);
+            if($state == PEEK_NEWLINE){
 
-        for (; bufRdr.hasNext(); ) {
-            char c = (char) bufRdr.readNext();
+            }
+
 
 
         }
-        return HttpStatusCode.ACCEPTED.code;
+
+
+        return HttpStatusCode.ACCEPTED;
     }
 
     public void decodeChar(int chr) {
-
-    }
-
-    private final void extractTopPart(int i, int mark, int idx) {
-        switch (i) {
-            case 0:
-                httpHeader.putHeader(
-                        METHOD.name, bufRdr.extract(mark, idx)
-                );
-                break;
-            case 1:
-                httpHeader.putHeader(
-                        HttpHeaderConstants.RESOURCE.name, bufRdr.extract(mark, idx)
-                );
-            case 2:
-                httpHeader.putHeader(
-                        HttpHeaderConstants.HTTP_VERS.name, bufRdr.extract(mark, idx)
-                );
-                break;
+        if(chr == SPACE_CHAR){
+            $state = PEEK_SPACE;
+            space++;
+        }else if (chr == NEWLINE_CHAR){
+            $state = PEEK_NEWLINE;
+            line++;
+        }else if (chr == COLON_CHAR){
+            $state = PEEK_DELIMITER;
         }
     }
 
+    private HttpMethods determineRequestMethod(){
+        HttpMethods method = null;
+        switch(bufRdr.readNext()){
+            case 'G':
+                method = HttpMethods.GET;
+                break;
+            case 'D':
+                method = HttpMethods.DELETE;
+                break;
+            case 'P':
+                if(bufRdr.readNext() == 'U')
+                    method = HttpMethods.PUT;
+                method = HttpMethods.POST;
+                break;
+        }
+        bufRdr.peek(HttpConstants.NEWLINE_CHAR,false);
+        return method;
+    }
+    
     private void readStream(final InputStream in, final CharBuffer chrBuf, final Charset encoding) throws IOException {
         new BufferedReader(new InputStreamReader(in, encoding)).read(chrBuf);
         chrBuf.flip();

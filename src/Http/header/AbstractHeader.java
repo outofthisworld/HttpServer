@@ -16,14 +16,13 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
     /**
      * Instantiates a new Abstract header.
      */
-    public AbstractHeader() {
-    }
+    public AbstractHeader() {}
 
 
     /**
      * Instantiates a new Abstract header.
      *
-     * @param vers       the vers
+     * @param vers the vers
      * @param statusCode the status code
      */
     public AbstractHeader(HttpVersion vers, HttpStatusCode statusCode) {
@@ -73,6 +72,11 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
         this.statusCode = statusCode;
     }
 
+    /**
+     * Gets header tags.
+     *
+     * @return the header tags
+     */
     public HashMap<String, String> getHeaderTags() {
         return headerTags;
     }
@@ -90,7 +94,7 @@ public abstract class AbstractHeader implements IDefaultHeader, IHeaderEncoder, 
     /**
      * Put header.
      *
-     * @param headerTag   the header tag
+     * @param headerTag the header tag
      * @param headerValue the header value
      */
     public void putHeader(String headerTag, String headerValue) {

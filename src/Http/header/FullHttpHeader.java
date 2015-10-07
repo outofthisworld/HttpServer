@@ -12,15 +12,17 @@ import java.util.stream.Stream;
 /**
  * Created by daleappleby on 4/10/15.
  */
-public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
+public class FullHttpHeader extends MinimalHttpHeader {
     private String accept;
+
+    public FullHttpHeader(){}
 
     /**
      * Instantiates a new Full http response header.
      *
      * @param header the header
      */
-    public FullOutgoingHttpHeader(HttpHeader header) {
+    public FullHttpHeader(HttpHeader header) {
         super(header.getHttpVers(), header.getStatusCode());
     }
 
@@ -29,7 +31,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
      *
      * @param vers the vers
      */
-    public FullOutgoingHttpHeader(HttpVersion vers) {
+    public FullHttpHeader(HttpVersion vers) {
         super(vers);
     }
 
@@ -38,7 +40,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
      *
      * @param httpStatusCode the http status code
      */
-    public FullOutgoingHttpHeader(HttpStatusCode httpStatusCode) {
+    public FullHttpHeader(HttpStatusCode httpStatusCode) {
         super(httpStatusCode);
     }
 
@@ -48,7 +50,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
      * @param vers       the vers
      * @param statusCode the status code
      */
-    public FullOutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode) {
+    public FullHttpHeader(HttpVersion vers, HttpStatusCode statusCode) {
         super(vers, statusCode);
     }
 
@@ -59,7 +61,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
      * @param statusCode the status code
      * @param date       the date
      */
-    public FullOutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date) {
+    public FullHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date) {
         super(vers, statusCode, date);
     }
 
@@ -70,7 +72,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
      * @param statusCode the status code
      * @param mimeTypes  the mime types
      */
-    public FullOutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode, MimeTypes mimeTypes) {
+    public FullHttpHeader(HttpVersion vers, HttpStatusCode statusCode, MimeTypes mimeTypes) {
         super(vers, statusCode, mimeTypes);
     }
 
@@ -82,7 +84,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
      * @param date       the date
      * @param mimeTypes  the mime types
      */
-    public FullOutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date, MimeTypes mimeTypes) {
+    public FullHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date, MimeTypes mimeTypes) {
         super(vers, statusCode, date, mimeTypes);
     }
 
@@ -111,7 +113,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
     /**
      * The type Full outgoing http header builder.
      */
-    public class FullOutgoingHttpHeaderBuilder<T extends FullOutgoingHttpHeader> extends DefaultHttpResponseBuilder {
+    public class FullOutgoingHttpHeaderBuilder<T extends FullHttpHeader> extends DefaultHttpResponseBuilder {
         /**
          * Instantiates a new Full outgoing http header builder.
          *
@@ -128,7 +130,7 @@ public class FullOutgoingHttpHeader extends OutgoingHttpHeader {
          * @return the full outgoing http header builder
          */
         public FullOutgoingHttpHeaderBuilder setAccept(HttpMethods... methodTypes) {
-            FullOutgoingHttpHeader.this.setAccept(methodTypes);
+            FullHttpHeader.this.setAccept(methodTypes);
             return this;
         }
 

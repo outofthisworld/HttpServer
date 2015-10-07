@@ -24,10 +24,7 @@ public class HttpServer implements Runnable {
     protected HttpServer(){}
 
     public static void main(String[] args) {
-
         startNewHttpServer();
-
-
     }
 
     public static HttpServer startNewHttpServer(){
@@ -93,7 +90,6 @@ public class HttpServer implements Runnable {
                 httpHeaderDecoder.decode(httpHeader,socket.getInputStream(), StandardCharsets.UTF_8,true);
 
 
-                isRunning=false;
 
 
 

@@ -68,10 +68,11 @@ public final class CharBufReader {
      * @return the int
      */
     public int peek(char c, boolean resetPosition){
+        if(!hasNext()) return -1;
         int startPos = getPosition();
         int place = -1;
+        char readChar =  getCharAtPosition(0);
         while(hasNext()){
-            char readChar =  getCharAtPosition(0);
             if(readChar == c) {
                 place =  getPosition();
                 break;

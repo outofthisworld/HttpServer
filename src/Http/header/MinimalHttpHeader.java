@@ -12,36 +12,36 @@ import java.util.stream.Stream;
 /**
  * Created by daleappleby on 4/10/15.
  */
-public class OutgoingHttpHeader extends HttpHeader {
+public class MinimalHttpHeader extends HttpHeader {
     private Date date;
     private String contentType;
 
-    public OutgoingHttpHeader() {
+    public MinimalHttpHeader() {
     }
 
-    public OutgoingHttpHeader(HttpVersion vers) {
+    public MinimalHttpHeader(HttpVersion vers) {
         super(vers);
     }
 
-    public OutgoingHttpHeader(HttpStatusCode httpStatusCode) {
+    public MinimalHttpHeader(HttpStatusCode httpStatusCode) {
         super(httpStatusCode);
     }
 
-    public OutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode) {
+    public MinimalHttpHeader(HttpVersion vers, HttpStatusCode statusCode) {
         super(vers, statusCode);
     }
 
-    public OutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date) {
+    public MinimalHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date) {
         super(vers, statusCode);
         setDate(date);
     }
 
-    public OutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode, MimeTypes mimeTypes) {
+    public MinimalHttpHeader(HttpVersion vers, HttpStatusCode statusCode, MimeTypes mimeTypes) {
         super(vers, statusCode);
         setContentType(mimeTypes);
     }
 
-    public OutgoingHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date, MimeTypes mimeTypes) {
+    public MinimalHttpHeader(HttpVersion vers, HttpStatusCode statusCode, Date date, MimeTypes mimeTypes) {
         super(vers, statusCode);
         setDate(date);
         setContentType(mimeTypes);
@@ -88,10 +88,10 @@ public class OutgoingHttpHeader extends HttpHeader {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof OutgoingHttpHeader)) return false;
+        if (!(o instanceof MinimalHttpHeader)) return false;
         if (!super.equals(o)) return false;
 
-        OutgoingHttpHeader that = (OutgoingHttpHeader) o;
+        MinimalHttpHeader that = (MinimalHttpHeader) o;
 
         if (contentType != null ? !contentType.equals(that.contentType) : that.contentType != null) return false;
         if (date != null ? !date.equals(that.date) : that.date != null) return false;
@@ -141,18 +141,18 @@ public class OutgoingHttpHeader extends HttpHeader {
         }
 
         public DefaultHttpResponseBuilder setDate(Date date) {
-            OutgoingHttpHeader.this.setDate(date);
+            MinimalHttpHeader.this.setDate(date);
             return this;
         }
 
         public DefaultHttpResponseBuilder setContentType(MimeTypes... mimeTypes) {
-            OutgoingHttpHeader.this.setContentType(mimeTypes);
+            MinimalHttpHeader.this.setContentType(mimeTypes);
             return this;
         }
 
         @Override
         public StringBuilder encode() {
-            return OutgoingHttpHeader.this.encode();
+            return MinimalHttpHeader.this.encode();
         }
     }
 }

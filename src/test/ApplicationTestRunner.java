@@ -14,19 +14,19 @@ import java.util.Arrays;
  * Created by daleappleby on 6/10/15.
  */
 public class ApplicationTestRunner {
-    private static final String SUITE_END_NAME = "Suite";
+    private static final String SUITE_ANNOTATION = "suite";
     private static final String CLASS = ".class";
     private static final String _IGNORE = "$";
     private static final String TEST_DIRECTORY = "test";
     private static final String PACKAGE_SEP = ".";
-    private static StringBuffer currentDir = new StringBuffer();
+    private static final StringBuffer currentDir = new StringBuffer();
 
     public static void main(String[] args) {
         TestClassVisitor testClassVisitor = new TestClassVisitor();
         try {
             Path path = Paths.get(ApplicationTestRunner.class.getProtectionDomain()
                     .getCodeSource().getLocation().getPath() + TEST_DIRECTORY);
-            Files.walkFileTree(path, );
+            Files.walkFileTree(path, testClassVisitor);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -57,11 +57,16 @@ public class ApplicationTestRunner {
 
             if (file.getFileName().toString().endsWith(CLASS)
                     && (!file.getFileName().toString().contains(ApplicationTestRunner.class.getSimpleName() + CLASS)
-                    && !file.getFileName().toString().contains(SUITE_END_NAME) && !file.getFileName().toString().contains(_IGNORE))) {
+                    && !file.getFileName().toString().contains(_IGNORE))) {
                 try {
-                    String klazz = file.getFileName().toString().replace(".class", "");
-                    classList.add(Class.forName(currentDir + klazz));
+                    Class<?> klazz = Class.forName(currentDir +  file.getFileName().toString().replace(".class", ""));
+                    if(Arrays.stream(klazz.newInstance().getClass().getAnnotations()).noneMatch(t->t.toString().toLowerCase().contains(SUITE_ANNOTATION)))
+                    classList.add(klazz);
                 } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
                     e.printStackTrace();
                 }
             }
